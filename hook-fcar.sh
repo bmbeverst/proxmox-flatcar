@@ -31,7 +31,7 @@ setup_flatcar-config-transpiler()
 	if [[ "$(/usr/local/bin/flatcar-config-transpiler --version)" != "ct v${CT_VER}" ]]; then
 		echo "Updating Container Linux Config Transpiler to version ${CT_VER}"
 		rm -f /usr/local/bin/flatcar-config-transpiler
-		${DOWNLOAD_COMMAND} ${DOWNLOAD_URL}/v${CT_VER}/ct-v${CT_VER}-${ARCH}-${OS} /usr/local/bin/flatcar-config-transpiler
+		${DOWNLOAD_COMMAND} /usr/local/bin/flatcar-config-transpiler ${DOWNLOAD_URL}/v${CT_VER}/ct-v${CT_VER}-${ARCH}-${OS}
 		chmod 755 /usr/local/bin/flatcar-config-transpiler
 	else
 		echo "Container Linux Config Transpiler already exists with expected version (v${CT_VER}). Continue..."

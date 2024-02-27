@@ -13,7 +13,8 @@ export LC_ALL=C
 declare CONFIG_FILE=template_deploy.conf
 
 #Get next available VMID
-TEMPLATE_VMID=$(pvesh get /cluster/nextid)
+#TEMPLATE_VMID=$(pvesh get /cluster/nextid)
+TEMPLATE_VMID=9000
 
 if [[ ! -f "${CONFIG_FILE}" ]] ;then
         echo "ERROR: File ${CONFIG_FILE} doesn't exists"
