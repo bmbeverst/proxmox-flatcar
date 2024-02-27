@@ -19,7 +19,7 @@ YQ="/usr/local/bin/yq e"
 #
 setup_flatcar-config-transpiler()
 {
-        local CT_VER=0.9.1
+	local CT_VER=0.9.4
 	local ARCH=x86_64
 	local OS=unknown-linux-gnu # Linux
 	local DOWNLOAD_URL=https://github.com/flatcar-linux/container-linux-config-transpiler/releases/download
@@ -42,7 +42,7 @@ setup_flatcar-config-transpiler
 setup_yq()
 {
 	# local VER=3.4.1
-	local YQ_VER=4.14.1
+	local YQ_VER=4.42.1
 
 	if [[ "$(/usr/local/bin/yq --version | awk '{print $NF}')" != "${YQ_VER}" ]]; then
 		echo "Updating yaml parser tool from v$(/usr/local/bin/yq --version | awk '{print $NF}') to v${YQ_VER}..."
