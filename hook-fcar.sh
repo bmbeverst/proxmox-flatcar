@@ -121,8 +121,8 @@ passwd:
       gecos: "Flatcar Administrator"
       password_hash: "${cipasswd}"
       groups: [ "sudo", "docker", "adm", "wheel", "systemd-journal" ]
-      ssh_authorized_keys: "${ssh_authorized_keys}"
-
+      ssh_authorized_keys:
+"${ssh_authorized_keys}"
 " >> ${FCAR_FILES_PATH}/${vmid}.yaml
 	echo "[done]"
 
