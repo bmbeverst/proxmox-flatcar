@@ -19,7 +19,7 @@ YQ="/usr/local/bin/yq e"
 #
 setup_flatcar-config-transpiler()
 {
-	local CT_VER=0.9.4
+	local CT_VER=0.9.3
 	local ARCH=x86_64
 	local OS=unknown-linux-gnu # Linux
 	local DOWNLOAD_URL=https://github.com/flatcar-linux/container-linux-config-transpiler/releases/download
@@ -44,8 +44,8 @@ setup_yq()
 	# local VER=3.4.1
 	local YQ_VER=4.42.1
 
-	if [[ "$(/usr/local/bin/yq --version | awk '{print $NF}')" != "${YQ_VER}" ]]; then
-		echo "Updating yaml parser tool from v$(/usr/local/bin/yq --version | awk '{print $NF}') to v${YQ_VER}..."
+	if [[ "$(/usr/local/bin/yq --version | awk '{print $NF}')" != "v${YQ_VER}" ]]; then
+		echo "Updating yaml parser tool from $(/usr/local/bin/yq --version | awk '{print $NF}') to v${YQ_VER}..."
 		rm -f /usr/local/bin/yq
 		${DOWNLOAD_COMMAND} /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v${YQ_VER}/yq_linux_amd64
 		chmod 755 /usr/local/bin/yq
@@ -230,7 +230,7 @@ echo "
 
 
 	echo -n "Flatcar Linux: Generate ignition config... "
-	/usr/local/bin/flatcar-config-transpiler 	--pretty --strict \
+	/usr/local/bin/flatcar-config-transpiler --pretty --strict \
 				--out-file ${FCAR_FILES_PATH}/${vmid}.ign \
 				--in-file ${FCAR_FILES_PATH}/${vmid}.yaml 2> /dev/null
 	[[ $? -eq 0 ]] || {
