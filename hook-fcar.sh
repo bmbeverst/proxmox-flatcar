@@ -11,45 +11,47 @@ FCAR_FILES_PATH=/etc/pve/flatcar
 # YQ="/usr/local/bin/yq read --exitStatus --printMode v --stripComments --"
 YQ="/usr/local/bin/yq e"
 
+
+[[ -x /usr/bin/wget ]] && DOWNLOAD_COMMAND="wget --quiet --show-progress --output-document"  || DOWNLOAD_COMMAND="curl --location --output"
+
 # ==================================================================================================================================================================
 # functions()
 #
 setup_flatcar-config-transpiler()
 {
         local CT_VER=0.9.1
-        local ARCH=x86_64
-        local OS=unknown-linux-gnu # Linux
-        local DOWNLOAD_URL=https://github.com/flatcar-linux/container-linux-config-transpiler/releases/download
- 
-        # [[ -x /usr/local/bin/flatcar-config-transpiler ]]&& [[ "x$(/usr/local/bin/flatcar-config-transpiler --version | awk '{print $NF}')" == "x${CT_VER}" ]]&& return 0
-        echo
-				echo "Setup Flatcar Linux config transpiler..."
-				echo
-				if [[ "$(/usr/local/bin/flatcar-config-transpiler --version)" != "ct v${CT_VER}" ]];then
-					echo "Updating Container Linux Config Transpiler to version ${CT_VER}"
-        	rm -f /usr/local/bin/flatcar-config-transpiler
-        	wget --quiet --show-progress ${DOWNLOAD_URL}/v${CT_VER}/ct-v${CT_VER}-${ARCH}-${OS} -O /usr/local/bin/flatcar-config-transpiler
-        	chmod 755 /usr/local/bin/flatcar-config-transpiler
-				else
-					echo "Container Linux Config Transpiler already exists with expected version (v${CT_VER}). Continue..."
-				fi
+	local ARCH=x86_64
+	local OS=unknown-linux-gnu # Linux
+	local DOWNLOAD_URL=https://github.com/flatcar-linux/container-linux-config-transpiler/releases/download
+
+	# [[ -x /usr/local/bin/flatcar-config-transpiler ]]&& [[ "x$(/usr/local/bin/flatcar-config-transpiler --version | awk '{print $NF}')" == "x${CT_VER}" ]]&& return 0
+	echo
+	echo "Setup Flatcar Linux config transpiler..."
+	echo
+	if [[ "$(/usr/local/bin/flatcar-config-transpiler --version)" != "ct v${CT_VER}" ]]; then
+		echo "Updating Container Linux Config Transpiler to version ${CT_VER}"
+		rm -f /usr/local/bin/flatcar-config-transpiler
+		${DOWNLOAD_COMMAND} ${DOWNLOAD_URL}/v${CT_VER}/ct-v${CT_VER}-${ARCH}-${OS} -O /usr/local/bin/flatcar-config-transpiler
+		chmod 755 /usr/local/bin/flatcar-config-transpiler
+	else
+		echo "Container Linux Config Transpiler already exists with expected version (v${CT_VER}). Continue..."
+	fi
 }
 setup_flatcar-config-transpiler
 
 setup_yq()
 {
-        # local VER=3.4.1
-        local YQ_VER=4.14.1
+	# local VER=3.4.1
+	local YQ_VER=4.14.1
 
-        [[ -x /usr/bin/wget ]] && download_command="wget --quiet --show-progress --output-document"  || download_command="curl --location --output"
-        if [[ -x /usr/local/bin/yq ]] && [[ "$(/usr/local/bin/yq --version | awk '{print $NF}')" != "${YQ_VER}" ]];then
-        	echo "Updating yaml parser tool from v$(/usr/local/bin/yq --version | awk '{print $NF}') to v${YQ_VER}..."
-					rm -f /usr/local/bin/yq
-        	${download_command} /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v${YQ_VER}/yq_linux_amd64
-        	chmod 755 /usr/local/bin/yq
-				else
-					echo "yaml parser tool (YQ) already exists with expected version. Continue..."
-				fi
+	if [[ "$(/usr/local/bin/yq --version | awk '{print $NF}')" != "${YQ_VER}" ]]; then
+		echo "Updating yaml parser tool from v$(/usr/local/bin/yq --version | awk '{print $NF}') to v${YQ_VER}..."
+		rm -f /usr/local/bin/yq
+		${DOWNLOAD_COMMAND} /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v${YQ_VER}/yq_linux_amd64
+		chmod 755 /usr/local/bin/yq
+	else
+		echo "yaml parser tool (YQ) already exists with expected version. Continue..."
+	fi
 }
 setup_yq
 
@@ -95,19 +97,19 @@ if [[ "${phase}" == "pre-start" ]]; then
 		exit 1
 	}
 
-  echo
-  echo
+	echo
+	echo
 	echo -n "Flatcar Linux: Generate yaml users block... "
 	ciuser="$(qm cloudinit dump ${vmid} user 2> /dev/null | grep ^user: | awk '{print $NF}')"
 
 	echo -e "# This file is generated at pre-start. Do not edit manualy.\n" > ${FCAR_FILES_PATH}/${vmid}.yaml
-	
+
 	if [[ $(qm cloudinit dump ${vmid} user | ${YQ} '.ssh_authorized_keys[]' - 2> /dev/null) ]];then
-	ssh_authorized_keys="$(qm cloudinit dump ${vmid} user | ${YQ} '.ssh_authorized_keys[]' - | sed -e 's/^/        - "/' -e 's/$/"/')"
+		ssh_authorized_keys="$(qm cloudinit dump ${vmid} user | ${YQ} '.ssh_authorized_keys[]' - | sed -e 's/^/        - "/' -e 's/$/"/')"
 	else
 		echo
 		echo -e "No ssh_authorized_keys found."
-		echo 
+		echo
 		ssh_authorized_keys=''
 	fi
 
@@ -128,7 +130,7 @@ passwd:
 
 	netcards="$(qm cloudinit dump ${vmid} network | ${YQ} '.config[].name' - 2> /dev/null | wc -l)"
 
-#Network Block	
+	#Network Block
 	echo "
 networkd:
   units:
@@ -143,7 +145,7 @@ networkd:
 			if [[ -z ${nameservers} ]];then
 				nameservers="$(qm cloudinit dump ${vmid} network | ${YQ} ".config[$((${i}+1))].address[]" -)"
 			fi
-			
+
 			searchdomain="$(qm cloudinit dump ${vmid} network | ${YQ} ".config[${i}].search[]" -)"
 			if [[ -z ${searchdomain} ]];then
 				searchdomain="$(qm cloudinit dump ${vmid} network | ${YQ} ".config[$((${i}+1))].search[]" -)"
@@ -170,7 +172,6 @@ networkd:
       Domains=${searchdomain}
 " >> ${FCAR_FILES_PATH}/${vmid}.yaml
 		fi
-
 	done
 	echo "[done]"
 
