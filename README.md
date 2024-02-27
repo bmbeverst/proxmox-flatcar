@@ -2,8 +2,9 @@
 A proxmox tool to create Flatcar VM template on Proxmox 8.x.
 
 # Requirements
+* Tested on Proxmox VE 8.1.4
+* Installs `flatcar-config-transpiler` and `yq` to `/usr/local/bin/` on Proxmox node.
 
-Tested on Proxmox VE 8.1.4
 # Usage
 
 1. Clone this repository on your Proxmox server
@@ -17,7 +18,7 @@ TEMPLATE_RECREATE="false" #Fore recreate template ?
 TEMPLATE_POOL="domain.lan"# domain name written in cloudinit config
 TEMPLATE_VMSTORAGE="local" #target storage for Template VM
 SNIPPET_STORAGE="local" #target storage for Snippets files
-VMDISK_OPTIONS=",discard=on"
+VMDISK_OPTIONS=""
 
 TEMPLATE_IGNITION="fcar-base-tmplt.yaml" #Name of template ignition file
 
@@ -28,7 +29,7 @@ BASEURL=https://stable.release.flatcar-linux.net
 ```
 3. Got to proxmox-flatcar directory
 4. run `./template_deploy.sh`
-  * If you want to recreate you need to delete the local file `TMPL-flatcar-current.id`
+     * If you want to recreate you need to delete the local file `TMPL-flatcar-current.id`
 5. Clone the template on same host.
 6. BEFORE first boot: update CloudInit config in Proxmox GUI (no update after first boot)
 7. Wait for multiple reboot the enjoy
