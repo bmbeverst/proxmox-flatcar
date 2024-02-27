@@ -1,9 +1,9 @@
 # proxmox-flatcar
-A proxmox tool to create Flatcar VM template on Proxmox 6.x.
+A proxmox tool to create Flatcar VM template on Proxmox 8.x.
 
 # Requirements
 
-Tested on Proxmox VE 6.2-4
+Tested on Proxmox VE 8.1.4
 # Usage
 
 1. Clone this repository on your Proxmox server
@@ -28,17 +28,17 @@ BASEURL=https://stable.release.flatcar-linux.net
 ```
 3. Got to proxmox-flatcar directory
 4. run `./template_deploy.sh`
+  * If you want to recreate you need to delete the local file `TMPL-flatcar-current.id`
 5. Clone the template on same host.
 6. BEFORE first boot: update CloudInit config in Proxmox GUI (no update after first boot)
 7. Wait for multiple reboot the enjoy
-
-**Note**: Docker TCP socket is exposed by default
 
 # Known issues
 
 - Cloned VM from template don't update it's ignition file when modifying CloudInit config in Proxmox VE GUI
 - If not shared storage is used to deploy template VM you can only deploy VM on same host as template VM (can't migrate)
 - Only IPv4 is supported
+
 # Credits
 Forked from awesome [Geco-It fedora-coreos-proxmox](https://git.geco-it.net/GECO-IT-PUBLIC/fedora-coreos-proxmox) ([Rev baff530f20](https://git.geco-it.net/GECO-IT-PUBLIC/fedora-coreos-proxmox/commit/baff530f200a708de8b61cb41ca4ba756b8e422d))
 
