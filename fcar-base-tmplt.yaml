@@ -6,28 +6,3 @@
           # Raise console message logging level from DEBUG (7) to WARNING (4)
           # to hide audit messages from the interactive console
           kernel.printk=4
-
-# Systemd services
-systemd:
-  units:
-
-# qemu-guest-agent
-    - name: setup-qemu-guest-agent.service
-      enabled: true
-      contents: |
-        [Unit]
-        Description=Flatcar Setup Qemu Guest Agent
-        After=network-online.target
-        Require=network-online.target
-        ConditionKernelCommandLine=ignition.platform.id=qemu
-        ConditionPathExists=!/var/lib/qemu-guest-agent.stamp
-
-        [Service]
-        Type=oneshot
-        RemainAfterExit=yes
-        ExecStart=/bin/rpm-ostree install qemu-guest-agent
-        ExecStart=/bin/touch /var/lib/qemu-guest-agent.stamp
-        ExecStart=/bin/systemctl --no-block reboot
-
-        [Install]
-        WantedBy=multi-user.target
