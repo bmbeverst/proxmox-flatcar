@@ -9,14 +9,17 @@
           # to hide audit messages from the interactive console
           kernel.printk=4
     - path: /etc/sysupdate.kubernetes.d/kubernetes.conf
+      mode: 0644
       contents:
         remote:
           url: https://github.com/flatcar/sysext-bakery/releases/download/latest/kubernetes.conf
     - path: /etc/sysupdate.d/noop.conf
+      mode: 0644
       contents:
         remote:
           url: https://github.com/flatcar/sysext-bakery/releases/download/latest/noop.conf
     - path: /opt/extensions/kubernetes/kubernetes-v1.27.4-x86-64.raw
+      mode: 0644
       contents:
         remote:
           url: https://github.com/flatcar/sysext-bakery/releases/download/latest/kubernetes-v1.27.4-x86-64.raw
