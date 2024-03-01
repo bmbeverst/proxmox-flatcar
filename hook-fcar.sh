@@ -204,16 +204,16 @@ echo "
           ${hostname,,}
 " >> ${FCAR_FILES_PATH}/${vmid}.yaml
 
-# Disable autologin
-echo "
-    - path: /grub.cfg
-      filesystem: oem
-      mode: 0644
-      contents:
-        inline: |
-          set oem_id=\"qemu\"
-          set linux_append=\"\"
-" >> ${FCAR_FILES_PATH}/${vmid}.yaml
+# # Disable autologin
+# echo "
+#     - path: /grub.cfg
+#       filesystem: oem
+#       mode: 0644
+#       contents:
+#         inline: |
+#           set oem_id=\"qemu\"
+#           set linux_append=\"\"
+# " >> ${FCAR_FILES_PATH}/${vmid}.yaml
 
     echo "[done]"
 
