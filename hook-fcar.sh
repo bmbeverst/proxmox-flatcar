@@ -44,7 +44,6 @@ setup_butane-config-transpiler()
     local ARCH=x86_64
     local OS=unknown-linux-gnu # Linux
     local DOWNLOAD_URL=https://github.com/coreos/butane/releases/download
-    #https://github.com/coreos/butane/releases/download/v0.20.0/butane-x86_64-unknown-linux-gnu
 
     if [[ ! -x ${TOOLS_PATH}/butane-config-transpiler || "$(${TOOLS_PATH}/butane-config-transpiler --version)" != "Butane ${BT_VER}" ]]; then
         echo "Updating Butane Config Transpiler to version ${BT_VER}"
@@ -60,9 +59,10 @@ setup_butane-config-transpiler
 setup_yq()
 {
     local YQ_VER=4.42.1
-
-    if [[ ! -x ${TOOLS_PATH}/yq || "$(${TOOLS_PATH}/yq --version | awk '{print $NF}')" != "v${YQ_VER}" ]]; then
-        echo "Updating yaml parser tool from $(${TOOLS_PATH}/yq --version | awk '{print $NF}') to v${YQ_VER}..."
+    # If yq does not exist value will be missing otherwise it will be yq version
+    [[ -x ${TOOLS_PATH}/yq ]] && ya_installed="$(${TOOLS_PATH}/yq --version | awk '{print $NF}')" || ya_installed="missing"
+    if [[ ! -x ${TOOLS_PATH}/yq || ${ya_installed} != "v${YQ_VER}" ]]; then
+        echo "Updating yaml parser tool from ${ya_installed} to v${YQ_VER}..."
         rm -f ${TOOLS_PATH}/yq
         ${DOWNLOAD_COMMAND} ${TOOLS_PATH}/yq https://github.com/mikefarah/yq/releases/download/v${YQ_VER}/yq_linux_amd64
         chmod 755 ${TOOLS_PATH}/yq
