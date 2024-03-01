@@ -1,5 +1,6 @@
 #!/bin/bash
 
+#set -x # debug mode
 #set -e
  
 vmid="$1"
@@ -8,8 +9,10 @@ phase="$2"
 # global vars
 FCAR_TMPLT=/opt/flatcar-tmplt.yaml
 FCAR_FILES_PATH=/etc/pve/flatcar
-# YQ="/usr/local/bin/yq read --exitStatus --printMode v --stripComments --"
-YQ="/usr/local/bin/yq e"
+TOOLS_PATH=/usr/local/bin
+TOOLS_PATH=.
+# YQ="${TOOLS_PATH}/yq read --exitStatus --printMode v --stripComments --"
+YQ="${TOOLS_PATH}/yq e"
 
 
 [[ -x /usr/bin/wget ]] && DOWNLOAD_COMMAND="wget --quiet --show-progress --output-document"  || DOWNLOAD_COMMAND="curl --location --output"
@@ -24,27 +27,45 @@ setup_flatcar-config-transpiler()
     local OS=unknown-linux-gnu # Linux
     local DOWNLOAD_URL=https://github.com/flatcar-linux/container-linux-config-transpiler/releases/download
 
-    if [[ "$(/usr/local/bin/flatcar-config-transpiler --version)" != "ct v${CT_VER}" ]]; then
+    if [[ ! -x ${TOOLS_PATH}/flatcar-config-transpiler || "$(${TOOLS_PATH}/flatcar-config-transpiler --version)" != "ct v${CT_VER}" ]]; then
         echo "Updating Container Linux Config Transpiler to version ${CT_VER}"
-        rm -f /usr/local/bin/flatcar-config-transpiler
-        ${DOWNLOAD_COMMAND} /usr/local/bin/flatcar-config-transpiler ${DOWNLOAD_URL}/v${CT_VER}/ct-v${CT_VER}-${ARCH}-${OS}
-        chmod 755 /usr/local/bin/flatcar-config-transpiler
+        rm -f ${TOOLS_PATH}/flatcar-config-transpiler
+        ${DOWNLOAD_COMMAND} ${TOOLS_PATH}/flatcar-config-transpiler ${DOWNLOAD_URL}/v${CT_VER}/ct-v${CT_VER}-${ARCH}-${OS}
+        chmod 755 ${TOOLS_PATH}/flatcar-config-transpiler
     else
         echo "Container Linux Config Transpiler already exists with expected version (v${CT_VER}). Continue..."
     fi
 }
 setup_flatcar-config-transpiler
 
+setup_butane-config-transpiler()
+{
+    local BT_VER=0.20.0
+    local ARCH=x86_64
+    local OS=unknown-linux-gnu # Linux
+    local DOWNLOAD_URL=https://github.com/coreos/butane/releases/download
+    #https://github.com/coreos/butane/releases/download/v0.20.0/butane-x86_64-unknown-linux-gnu
+
+    if [[ ! -x ${TOOLS_PATH}/butane-config-transpiler || "$(${TOOLS_PATH}/butane-config-transpiler --version)" != "Butane ${BT_VER}" ]]; then
+        echo "Updating Butane Config Transpiler to version ${BT_VER}"
+        rm -f ${TOOLS_PATH}/butane-config-transpiler
+        ${DOWNLOAD_COMMAND} ${TOOLS_PATH}/butane-config-transpiler ${DOWNLOAD_URL}/v${BT_VER}/butane-${ARCH}-${OS}
+        chmod 755 ${TOOLS_PATH}/butane-config-transpiler
+    else
+        echo "Butane Config Transpiler already exists with expected version (v${BT_VER}). Continue..."
+    fi
+}
+setup_butane-config-transpiler
+
 setup_yq()
 {
-    # local VER=3.4.1
     local YQ_VER=4.42.1
 
-    if [[ "$(/usr/local/bin/yq --version | awk '{print $NF}')" != "v${YQ_VER}" ]]; then
-        echo "Updating yaml parser tool from $(/usr/local/bin/yq --version | awk '{print $NF}') to v${YQ_VER}..."
-        rm -f /usr/local/bin/yq
-        ${DOWNLOAD_COMMAND} /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v${YQ_VER}/yq_linux_amd64
-        chmod 755 /usr/local/bin/yq
+    if [[ ! -x ${TOOLS_PATH}/yq || "$(${TOOLS_PATH}/yq --version | awk '{print $NF}')" != "v${YQ_VER}" ]]; then
+        echo "Updating yaml parser tool from $(${TOOLS_PATH}/yq --version | awk '{print $NF}') to v${YQ_VER}..."
+        rm -f ${TOOLS_PATH}/yq
+        ${DOWNLOAD_COMMAND} ${TOOLS_PATH}/yq https://github.com/mikefarah/yq/releases/download/v${YQ_VER}/yq_linux_amd64
+        chmod 755 ${TOOLS_PATH}/yq
     else
         echo "yaml parser tool (YQ) already exists with expected version (v${YQ_VER}). Continue..."
     fi
@@ -226,7 +247,7 @@ echo "
 
 
     echo -n "Flatcar Linux: Generate ignition config... "
-    /usr/local/bin/flatcar-config-transpiler --pretty --strict \
+    ${TOOLS_PATH}/flatcar-config-transpiler --pretty --strict \
                 --out-file ${FCAR_FILES_PATH}/${vmid}.ign \
                 --in-file ${FCAR_FILES_PATH}/${vmid}.yaml 2> /dev/null
     [[ $? -eq 0 ]] || {
