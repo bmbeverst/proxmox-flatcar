@@ -10,7 +10,6 @@ phase="$2"
 FCAR_TMPLT=/opt/flatcar-tmplt.yaml
 FCAR_FILES_PATH=/etc/pve/flatcar
 TOOLS_PATH=/usr/local/bin
-TOOLS_PATH=.
 # YQ="${TOOLS_PATH}/yq read --exitStatus --printMode v --stripComments --"
 YQ="${TOOLS_PATH}/yq e"
 
