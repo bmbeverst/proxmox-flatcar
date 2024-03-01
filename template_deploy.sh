@@ -44,7 +44,8 @@ elif [[ -f ${TEMPLATE_NAME_FULL}.id ]] && [[ ${TEMPLATE_RECREATE} == true ]];the
         qm destroy ${TEMPLATE_VMID} --purge
         rm ./${TEMPLATE_NAME_FULL}.id
         sleep 3
-        TEMPLATE_VMID=$(pvesh get /cluster/nextid)
+#         TEMPLATE_VMID=$(pvesh get /cluster/nextid)
+        TEMPLATE_VMID=9000
         echo "${TEMPLATE_VMID}" > ${TEMPLATE_NAME_FULL}.id
         TEMPLATE_CREATE="true"
 else
@@ -151,6 +152,8 @@ if [[ ${TEMPLATE_CREATE} == "true" ]];then
         # set hook-script
         qm set ${TEMPLATE_VMID} -hookscript ${SNIPPET_STORAGE}:snippets/hook-fcar.sh
 
+        # Add 8 GB disk space
+        qm disk resize ${TEMPLATE_VMID} scsi0 +8G
         # convert vm template
         echo -n "Convert VM ${TEMPLATE_VMID} in proxmox vm template... "
         qm template ${TEMPLATE_VMID} &> /dev/null || true
