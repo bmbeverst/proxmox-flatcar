@@ -257,8 +257,6 @@ echo "
         # hack for reload new ignition file
         echo -e "\nWARNING: New generated Flatcar Linux ignition settings, restarting vm ${vmid}."
         qm start ${vmid}
-#         sleep 20
-#         qm stop ${vmid} && sleep 2 && qm start ${vmid}
         exit 0
     }
 fi
