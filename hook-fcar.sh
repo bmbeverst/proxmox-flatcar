@@ -130,7 +130,7 @@ if [[ "${phase}" == "pre-start" ]]; then
     fi
 
 
-    echo "
+echo "
 ---
 version: 1.1.0
 variant: flatcar
@@ -149,11 +149,11 @@ passwd:
     hostname="$(qm cloudinit dump ${vmid} user | ${YQ} '.hostname' - 2> /dev/null)"
 
 # Storage block
-    echo "
+echo "
 storage:
 " >> ${FCAR_FILES_PATH}/${vmid}.yaml
 
-    echo "
+echo "
   filesystems:
 " >> ${FCAR_FILES_PATH}/${vmid}.yaml
 
@@ -165,11 +165,11 @@ echo "
         label: OEM
 " >> ${FCAR_FILES_PATH}/${vmid}.yaml
 
-    echo "
+echo "
   files:
 " >> ${FCAR_FILES_PATH}/${vmid}.yaml
 
-    echo "
+echo "
     - path: /etc/hostname
       mode: 0644
       overwrite: true
@@ -220,17 +220,16 @@ echo "
             # ipv6: TODO: Disable explicitly IPV6
 
             echo "
-  - path: /etc/systemd/network/00-${netcard_name}.network
-    contents:
-      inline: |
-        [Match]
-        Name=${netcard_name}
-
-        [Network]
-        DNS=${nameservers}
-        Address=${ipv4}/${cidr}
-        Gateway=${gw}
-        Domains=${searchdomain}
+    - path: /etc/systemd/network/00-${netcard_name}.network
+      contents:
+        inline: |
+          [Match]
+          Name=${netcard_name}
+          [Network]
+          DNS=${nameservers}
+          Address=${ipv4}/${cidr}
+          Gateway=${gw}
+          Domains=${searchdomain}
 " >> ${FCAR_FILES_PATH}/${vmid}.yaml
         fi
     done
