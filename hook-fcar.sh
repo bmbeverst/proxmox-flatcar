@@ -154,18 +154,6 @@ storage:
 " >> ${FCAR_FILES_PATH}/${vmid}.yaml
 
 echo "
-  filesystems:
-" >> ${FCAR_FILES_PATH}/${vmid}.yaml
-
-echo "
-    - name: oem
-      mount:
-        device: /dev/disk/by-label/OEM
-        format: ext4
-        label: OEM
-" >> ${FCAR_FILES_PATH}/${vmid}.yaml
-
-echo "
   files:
 " >> ${FCAR_FILES_PATH}/${vmid}.yaml
 
