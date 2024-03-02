@@ -131,6 +131,9 @@ if [[ "${phase}" == "pre-start" ]]; then
 
 
     echo "
+---
+version: 1.1.0
+variant: flatcar
 passwd:
   users:
     - name: "${ciuser:-core}"
@@ -140,55 +143,6 @@ passwd:
       ssh_authorized_keys:
       "${ssh_authorized_keys}"
 " >> ${FCAR_FILES_PATH}/${vmid}.yaml
-    echo "[done]"
-
-    echo -n "Flatcar Linux: Generate yaml network block... "
-
-    netcards="$(qm cloudinit dump ${vmid} network | ${YQ} '.config[].name' - 2> /dev/null | wc -l)"
-
-    #Network Block
-    echo "
-networkd:
-  units:
-" >> ${FCAR_FILES_PATH}/${vmid}.yaml
-
-    for (( i=O; i<${netcards}; i++ ))
-    do
-        netcard_name="$(qm cloudinit dump ${vmid} network | ${YQ} ".config[${i}].name" - 2> /dev/null)"
-        if [[ ${netcard_name} != "null" ]];then
-
-            nameservers="$(qm cloudinit dump ${vmid} network | ${YQ} ".config[${i}].address[]" -)"
-            if [[ -z ${nameservers} ]];then
-                nameservers="$(qm cloudinit dump ${vmid} network | ${YQ} ".config[$((${i}+1))].address[]" -)"
-            fi
-
-            searchdomain="$(qm cloudinit dump ${vmid} network | ${YQ} ".config[${i}].search[]" -)"
-            if [[ -z ${searchdomain} ]];then
-                searchdomain="$(qm cloudinit dump ${vmid} network | ${YQ} ".config[$((${i}+1))].search[]" -)"
-            fi
-
-            ipv4="" netmask="" gw="" macaddr="" # reset on each run
-            ipv4="$(qm cloudinit dump ${vmid} network | ${YQ} ".config[${i}].subnets[0].address" - 2> /dev/null)" || continue # dhcp
-            netmask="$(qm cloudinit dump ${vmid} network | ${YQ} ".config[${i}].subnets[0].netmask" - 2> /dev/null)"
-            cidr="$(mask2cdr ${netmask})"
-            gw="$(qm cloudinit dump ${vmid} network | ${YQ} ".config[${i}].subnets[0].gateway" - 2> /dev/null)" || true # can be empty
-            macaddr="$(qm cloudinit dump ${vmid} network | ${YQ} ".config[${i}].mac_address" - 2> /dev/null)"
-            # ipv6: TODO: Disable explicitly IPV6
-
-            echo "
-  - name: 00-${netcard_name}.network
-    contents: |
-      [Match]
-      Name=${netcard_name}
-
-      [Network]
-      DNS=${nameservers}
-      Address=${ipv4}/${cidr}
-      Gateway=${gw}
-      Domains=${searchdomain}
-" >> ${FCAR_FILES_PATH}/${vmid}.yaml
-        fi
-    done
     echo "[done]"
 
     echo -n "Flatcar Linux: Generate yaml hostname block... "
@@ -237,6 +191,51 @@ echo "
 
     echo "[done]"
 
+    echo -n "Flatcar Linux: Generate yaml network files... "
+
+    netcards="$(qm cloudinit dump ${vmid} network | ${YQ} '.config[].name' - 2> /dev/null | wc -l)"
+
+    #Network Block
+    for (( i=O; i<${netcards}; i++ ))
+    do
+        netcard_name="$(qm cloudinit dump ${vmid} network | ${YQ} ".config[${i}].name" - 2> /dev/null)"
+        if [[ ${netcard_name} != "null" ]];then
+
+            nameservers="$(qm cloudinit dump ${vmid} network | ${YQ} ".config[${i}].address[]" -)"
+            if [[ -z ${nameservers} ]];then
+                nameservers="$(qm cloudinit dump ${vmid} network | ${YQ} ".config[$((${i}+1))].address[]" -)"
+            fi
+
+            searchdomain="$(qm cloudinit dump ${vmid} network | ${YQ} ".config[${i}].search[]" -)"
+            if [[ -z ${searchdomain} ]];then
+                searchdomain="$(qm cloudinit dump ${vmid} network | ${YQ} ".config[$((${i}+1))].search[]" -)"
+            fi
+
+            ipv4="" netmask="" gw="" macaddr="" # reset on each run
+            ipv4="$(qm cloudinit dump ${vmid} network | ${YQ} ".config[${i}].subnets[0].address" - 2> /dev/null)" || continue # dhcp
+            netmask="$(qm cloudinit dump ${vmid} network | ${YQ} ".config[${i}].subnets[0].netmask" - 2> /dev/null)"
+            cidr="$(mask2cdr ${netmask})"
+            gw="$(qm cloudinit dump ${vmid} network | ${YQ} ".config[${i}].subnets[0].gateway" - 2> /dev/null)" || true # can be empty
+            macaddr="$(qm cloudinit dump ${vmid} network | ${YQ} ".config[${i}].mac_address" - 2> /dev/null)"
+            # ipv6: TODO: Disable explicitly IPV6
+
+            echo "
+  - path: /etc/systemd/network/00-${netcard_name}.network
+    contents:
+      inline: |
+        [Match]
+        Name=${netcard_name}
+
+        [Network]
+        DNS=${nameservers}
+        Address=${ipv4}/${cidr}
+        Gateway=${gw}
+        Domains=${searchdomain}
+" >> ${FCAR_FILES_PATH}/${vmid}.yaml
+        fi
+    done
+    echo "[done]"
+
 
     if [[ -e "${FCAR_TMPLT}" ]];then
         echo -n "Flatcar Linux: Generate other block based on template... "
@@ -246,9 +245,9 @@ echo "
 
 
     echo -n "Flatcar Linux: Generate ignition config... "
-    ${TOOLS_PATH}/flatcar-config-transpiler --pretty --strict \
-                --out-file ${FCAR_FILES_PATH}/${vmid}.ign \
-                --in-file ${FCAR_FILES_PATH}/${vmid}.yaml 2> /dev/null
+    ${TOOLS_PATH}/butane-config-transpiler --pretty --strict \
+                > ${FCAR_FILES_PATH}/${vmid}.ign \
+                < ${FCAR_FILES_PATH}/${vmid}.yaml 2> /dev/null
     [[ $? -eq 0 ]] || {
         echo "[failed]"
         exit 1
