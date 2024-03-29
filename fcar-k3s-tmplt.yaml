@@ -1,0 +1,25 @@
+# kernel config
+# storage:
+#   files:
+    - path: /etc/sysctl.d/20-silence-audit.conf
+      mode: 0644      
+      contents:
+        inline: |
+          # Raise console message logging level from DEBUG (7) to WARNING (4)
+          # to hide audit messages from the interactive console
+          kernel.printk=4
+
+systemd:
+  units:
+    - name: k3sInstall.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=k3s install service
+        Requires=containerd.service
+        After=containerd.service
+        ConditionPathExists=!/etc/rancher/k3s/config.yaml
+        [Service]
+        ExecStart=curl -sfL https://get.k3s.io | sh -s - --secrets-encryption --token SuperSecrectToken
+        [Install]
+        WantedBy=multi-user.target
