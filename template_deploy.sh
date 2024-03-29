@@ -112,12 +112,12 @@ fi
 if [[ ${TEMPLATE_CREATE} == "true" ]];then
         echo "Create flatcar vm template ${TEMPLATE_VMID}"
         qm create ${TEMPLATE_VMID} --name ${TEMPLATE_NAME_FULL}
-        qm set ${TEMPLATE_VMID} --memory 2048 \
+        qm set ${TEMPLATE_VMID} --memory 8192 \
                                 --cpu host \
-                                --cores 2 \
+                                --cores 3 \
                                 --agent enabled=1 \
                                 --autostart \
-                                --onboot 1 \
+                                --onboot 0 \
                                 --ostype l26 \
                                 --tablet 0 \
                                 --boot c --bootdisk scsi0
