@@ -35,7 +35,7 @@ setup_flatcar-config-transpiler()
         echo "Container Linux Config Transpiler already exists with expected version (v${CT_VER}). Continue..."
     fi
 }
-setup_flatcar-config-transpiler
+#setup_flatcar-config-transpiler
 
 setup_butane-config-transpiler()
 {
