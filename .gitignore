@@ -1,0 +1,3 @@
+# Local build artifacts
+/TMPL-flatcar-current.id
+/butane-config-transpiler
