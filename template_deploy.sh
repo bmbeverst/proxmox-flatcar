@@ -28,6 +28,11 @@ if [[ -z "${VERSION}" ]] || [[ "${VERSION}" == latest ]];then
         VERSION="current"
 fi
 
+# sane defaults for template sizing, overridable from config file
+TEMPLATE_MEMORY=${TEMPLATE_MEMORY:-8192}
+TEMPLATE_CORES=${TEMPLATE_CORES:-3}
+TEMPLATE_DISK_GROW=${TEMPLATE_DISK_GROW:-+15G}
+
 TEMPLATE_NAME_FULL="${TEMPLATE_NAME}-${VERSION}"
 
 if [[ -f ${TEMPLATE_NAME_FULL}.id ]] && [[ ${TEMPLATE_RECREATE} != true ]];then
@@ -112,10 +117,10 @@ fi
 if [[ ${TEMPLATE_CREATE} == "true" ]];then
         echo "Create flatcar vm template ${TEMPLATE_VMID}"
         qm create ${TEMPLATE_VMID} --name ${TEMPLATE_NAME_FULL}
-        qm set ${TEMPLATE_VMID} --memory 8192 \
+        qm set ${TEMPLATE_VMID} --memory ${TEMPLATE_MEMORY} \
                                 --cpu host \
-                                --cores 3 \
-                                --agent enabled=1 \
+                                --cores ${TEMPLATE_CORES} \
+                                --agent enabled=1,fstrim_cloned_disks=1 \
                                 --autostart \
                                 --onboot 0 \
                                 --ostype l26 \
@@ -147,13 +152,13 @@ if [[ ${TEMPLATE_CREATE} == "true" ]];then
         fi
         qm importdisk ${TEMPLATE_VMID} ${FCAR_IMAGE} ${TEMPLATE_VMSTORAGE} ${vmdisk_format}
 
-        qm set ${TEMPLATE_VMID} --scsihw virtio-scsi-pci --scsi0 ${TEMPLATE_VMSTORAGE}:${vmdisk_name}${VMDISK_OPTIONS}
+        qm set ${TEMPLATE_VMID} --scsihw virtio-scsi-single --scsi0 ${TEMPLATE_VMSTORAGE}:${vmdisk_name},discard=on,iothread=1${VMDISK_OPTIONS}
 
         # set hook-script
         qm set ${TEMPLATE_VMID} -hookscript ${SNIPPET_STORAGE}:snippets/hook-fcar.sh
 
-        # Add 8 GB disk space
-        qm disk resize ${TEMPLATE_VMID} scsi0 +8G
+        # Grow the base disk (final per-node size is set again after cloning)
+        qm disk resize ${TEMPLATE_VMID} scsi0 ${TEMPLATE_DISK_GROW}
         # convert vm template
         echo -n "Convert VM ${TEMPLATE_VMID} in proxmox vm template... "
         qm template ${TEMPLATE_VMID} &> /dev/null || true
