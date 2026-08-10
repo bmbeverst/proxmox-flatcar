@@ -8,6 +8,11 @@
           # Raise console message logging level from DEBUG (7) to WARNING (4)
           # to hide audit messages from the interactive console
           kernel.printk=4
+    - path: /etc/flatcar/update.conf
+      mode: 0644
+      contents:
+        inline: |
+          REBOOT_STRATEGY=off
 systemd:
   units:
     - name: locksmithd.service
@@ -15,4 +20,8 @@ systemd:
     - name: docker.service
       mask: true
     - name: docker.socket
+      mask: true
+    - name: systemd-sysupdate-reboot.timer
+      mask: true
+    - name: systemd-sysupdate-reboot.service
       mask: true
