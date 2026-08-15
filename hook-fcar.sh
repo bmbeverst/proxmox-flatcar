@@ -7,7 +7,7 @@ vmid="$1"
 phase="$2"
 
 # global vars
-FCAR_TMPLT=/opt/flatcar-tmplt.yaml
+FCAR_TMPLT=/opt/flatcar-tmplt.yaml # Rewritten by template_deploy.sh (sed) when this hook is deployed
 FCAR_FILES_PATH=/etc/pve/flatcar
 TOOLS_PATH=/usr/local/bin
 # YQ="${TOOLS_PATH}/yq read --exitStatus --printMode v --stripComments --"
@@ -209,6 +209,7 @@ echo "
 
             echo "
     - path: /etc/systemd/network/00-${netcard_name}.network
+      overwrite: true
       contents:
         inline: |
           [Match]

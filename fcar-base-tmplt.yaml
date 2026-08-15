@@ -1,8 +1,15 @@
 # kernel config
+#
+# NOTE: `overwrite: true` is REQUIRED on all storage.files (incl. those from
+# hook-fcar.sh): the hook restarts the VM, so ignition re-applies over existing
+# files; without overwrite it fails ("file already exists") and the VM hangs in
+# an emergency shell every boot.
+#
 # storage:
 #   files:
     - path: /etc/sysctl.d/20-silence-audit.conf
-      mode: 0644      
+      mode: 0644
+      overwrite: true
       contents:
         inline: |
           # Raise console message logging level from DEBUG (7) to WARNING (4)
@@ -10,6 +17,7 @@
           kernel.printk=4
     - path: /etc/flatcar/update.conf
       mode: 0644
+      overwrite: true
       contents:
         inline: |
           REBOOT_STRATEGY=off
