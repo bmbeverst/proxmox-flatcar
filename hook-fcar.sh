@@ -2,7 +2,7 @@
 
 #set -x # debug mode
 #set -e
- 
+
 vmid="$1"
 phase="$2"
 
@@ -39,7 +39,7 @@ setup_flatcar-config-transpiler()
 
 setup_butane-config-transpiler()
 {
-    local BT_VER=0.20.0
+    local BT_VER=0.29.0
     local ARCH=x86_64
     local OS=unknown-linux-gnu # Linux
     local DOWNLOAD_URL=https://github.com/coreos/butane/releases/download
@@ -57,7 +57,7 @@ setup_butane-config-transpiler
 
 setup_yq()
 {
-    local YQ_VER=4.42.1
+    local YQ_VER=4.53.3
     # If yq does not exist value will be missing otherwise it will be yq version
     [[ -x ${TOOLS_PATH}/yq ]] && ya_installed="$(${TOOLS_PATH}/yq --version | awk '{print $NF}')" || ya_installed="missing"
     if [[ ! -x ${TOOLS_PATH}/yq || ${ya_installed} != "v${YQ_VER}" ]]; then
