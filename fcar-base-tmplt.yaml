@@ -21,6 +21,16 @@
       contents:
         inline: |
           REBOOT_STRATEGY=off
+    - path: /etc/systemd/journald.conf.d/90-volatile.conf
+      mode: 0644
+      overwrite: true
+      contents:
+        inline: |
+          [Journal]
+          Storage=volatile
+          RuntimeMaxUse=128M
+
+
 systemd:
   units:
     - name: locksmithd.service

@@ -29,7 +29,7 @@ if [[ -z "${VERSION}" ]] || [[ "${VERSION}" == latest ]];then
 fi
 
 # sane defaults for template sizing, overridable from config file
-TEMPLATE_MEMORY=${TEMPLATE_MEMORY:-8192}
+TEMPLATE_MEMORY=${TEMPLATE_MEMORY:-7168}   # 7 GiB, non-ballooning
 TEMPLATE_CORES=${TEMPLATE_CORES:-3}
 TEMPLATE_DISK_GROW=${TEMPLATE_DISK_GROW:-+15G}
 
